@@ -5,7 +5,7 @@ using System.IO;
 
 public class ExternalImageLoader : MonoBehaviour
 {
-    public string imageFolderPath = @"D:\Blbosti reborn\Blbosti"; // Set the folder path here
+    public string imageFolderPath = @"G:\Unity\projects\bakalarka\Assets\images";
     public float displayTime = 1.0f; // Time per image in seconds
     private Material material;
     private List<Texture2D> loadedImages = new List<Texture2D>();
@@ -36,11 +36,19 @@ public class ExternalImageLoader : MonoBehaviour
 
     void LoadImagesFromFolder()
     {
-        string[] imageFiles = Directory.GetFiles(imageFolderPath, "*.png"); // Load PNG images (add "*.jpg" or others if needed)
-        
+        string[] imageFiles = Directory.GetFiles(imageFolderPath);
+
         foreach (string imageFile in imageFiles)
         {
-            Texture2D texture = LoadTextureFromFile(imageFile);
+            string extension = Path.GetExtension(imageFile).ToLower();
+            Texture2D texture = null;
+
+            // Check the file extension and load accordingly
+            if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+            {
+                texture = LoadTextureFromFile(imageFile);
+            }
+
             if (texture != null)
             {
                 loadedImages.Add(texture);
@@ -52,7 +60,7 @@ public class ExternalImageLoader : MonoBehaviour
     {
         byte[] fileData = File.ReadAllBytes(filePath);
         Texture2D texture = new Texture2D(2, 2);
-        if (texture.LoadImage(fileData)) // LoadImage will auto-resize the texture
+        if (texture.LoadImage(fileData))
         {
             return texture;
         }
