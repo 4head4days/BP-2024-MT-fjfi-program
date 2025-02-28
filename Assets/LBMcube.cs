@@ -81,27 +81,33 @@ public class LBMcube : MonoBehaviour
     }
 
     void UpdateTexture()
+{
+    Debug.Log("Updating texture...");
+    Color[] pixels = new Color[texture.width * texture.height];
+
+    for (int x = 0; x < texture.width; x++)
     {
-        Debug.Log("Updating texture...");
-        Color[] pixels = new Color[texture.width * texture.height];
-
-        for (int x = 0; x < texture.width; x++)
+        for (int y = 0; y < texture.height; y++)
         {
-            for (int y = 0; y < texture.height; y++)
+            int idx = lbm.D1Idx(x, y);
+            double[] df = new double[9];
+            for (int i = 0; i < 9; i++)
             {
-                int idx = lbm.D1Idx(x, y);
-                double vx = lbm.LBM2PhysVelocity(lbm.velocity[idx, 0]);
-                double vy = lbm.LBM2PhysVelocity(lbm.velocity[idx, 1]);
-
-                // Map velocity to heatmap color
-                float magnitude = Mathf.Clamp((float)Math.Sqrt(vx * vx + vy * vy), 0, 1);
-                Color color = Color.Lerp(Color.blue, Color.red, magnitude);
-                pixels[x + y * texture.width] = color;
+                df[i] = lbm.df1[idx, i];
             }
-        }
+            var (rho_loc, velocity) = lbm.ComputeMacro(df);
+            double vx = velocity[0];
+            double vy = velocity[1];
 
-        texture.SetPixels(pixels);
-        texture.Apply();
-        Debug.Log("Texture updated.");
+            // Map density and velocity to heatmap color
+            float magnitude = Mathf.Clamp((float)Math.Sqrt(vx * vx + vy * vy), 0, 1);
+            Color color = Color.Lerp(Color.blue, Color.red, magnitude);
+            pixels[x + y * texture.width] = color;
+        }
     }
+
+    texture.SetPixels(pixels);
+    texture.Apply();
+    Debug.Log("Texture updated.");
+}
 }
